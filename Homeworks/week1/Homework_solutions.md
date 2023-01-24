@@ -39,7 +39,8 @@ FROM
     green_taxi_data t
 WHERE
     CAST (t.lpep_pickup_datetime AS DATE) = '2019-01-15'
-    AND CAST (t.lpep_dropoff_datetime AS DATE) = '2019-01-15';
+AND 
+    CAST (t.lpep_dropoff_datetime AS DATE) = '2019-01-15';
 ```
 
 Output:
