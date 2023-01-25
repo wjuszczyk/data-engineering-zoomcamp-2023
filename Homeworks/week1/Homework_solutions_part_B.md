@@ -1,3 +1,4 @@
+```
 $ terraform apply
 var.project
   Your GCP Project ID
@@ -104,3 +105,4 @@ google_storage_bucket.data-lake-bucket: Creation complete after 1s [id=dtc_data_
 google_bigquery_dataset.dataset: Creation complete after 1s [id=projects/dtc-de-course-375723/datasets/trips_data_all]
 
 Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+```
