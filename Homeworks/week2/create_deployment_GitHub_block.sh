@@ -1,0 +1,2 @@
+#!/bin/sh
+prefect deployment build -n "GitHub-deployment" -v 1 -q default -sb github/zoomcamp week2_sandbox/ETL_GCP_Prefect/flows/etl_web_to_gcs_param.py:etl_parent_flow --params='{"year":2020, "months":[11], "color":"green"}' -a
