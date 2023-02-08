@@ -3,9 +3,10 @@ import pandas as pd
 from pathlib import Path
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
-#from random import randint
+from prefect.tasks import task_input_hash
+from datetime import timedelta
 
-@task(retries=3)
+@task(name="Fetch taxi data from web", retries=3, cache_expiration=timedelta(days=1))
 def fetch(dataset_url: str) -> pd.DataFrame:
     """Read taxi data from web into pandas DataFrame"""
     # if randint(0, 1) > 0:
@@ -13,7 +14,7 @@ def fetch(dataset_url: str) -> pd.DataFrame:
     df = pd.read_csv(dataset_url)
     return df
 
-@task(log_prints=True)
+@task(name="Clean dtype issues", log_prints=True)
 def clean(df: pd.DataFrame, color: str) -> pd.DataFrame:
     """Fix dtype issues depending on name of dataset"""
     if color == "green":
@@ -27,7 +28,7 @@ def clean(df: pd.DataFrame, color: str) -> pd.DataFrame:
     print(f"rows: {len(df)}")
     return df
 
-@task()
+@task(name="Write DataFrame to parquet file")
 def write_local(df: pd.DataFrame, color: str, dataset_file: str) -> Path:
     """Write DataFrame out locally as parquet file"""
     # if there's no directory structure, make ones
@@ -37,7 +38,7 @@ def write_local(df: pd.DataFrame, color: str, dataset_file: str) -> Path:
     df.to_parquet(path, compression="gzip")
     return path  
 
-@task()
+@task(name="Upload parquet file to GCS")
 def write_gcs(path: Path) -> None:
     """Uploading local parquet file to GCS"""
     # change path to posix type, requires prefect-gcp[cloud_storage]==0.2.4 (fix Windows double backslashes to slashes)
@@ -49,19 +50,26 @@ def write_gcs(path: Path) -> None:
     )
 
 @flow()
-def etl_web_to_gcs() -> None:
+def etl_web_to_gcs(year: int, month: int, color: str) -> None:
     """The main ETL function"""
-    color = "yellow"
-    year = 2019
-    # color = "yellow"    
-    # year = 2021
-    month = 3
     dataset_file = f"{color}_tripdata_{year}-{month:02}"
     dataset_url = f"https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{color}/{dataset_file}.csv.gz"
+    
     df = fetch(dataset_url)
     df_clean = clean(df, color)
     path = write_local(df_clean, color, dataset_file)
     write_gcs(path)
 
+@flow()
+def etl_parent_flow(
+    months: list[int] = [1, 2], year: int = 2021, color: str = "yellow"
+):
+    for month in months:
+        etl_web_to_gcs(year, month, color)
+
 if __name__ == "__main__":
-    etl_web_to_gcs()
+    color = "yellow"
+    months = [1, 2, 3]
+    year = 2021
+
+    etl_parent_flow(months, year, color)
