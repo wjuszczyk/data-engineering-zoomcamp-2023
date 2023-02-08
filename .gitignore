@@ -1,3 +1,5 @@
 week1_sandbox/ny_taxi_postgres_data
 week1_sandbox/pgadmin
 *.parquet
+__pycache__/
+.prefectignore
