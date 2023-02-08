@@ -37,7 +37,7 @@ def write_bq(df: pd.DataFrame, color: str) -> None:
     )
 
 
-@flow()
+@flow(log_prints=True)
 def etl_gcs_to_bq(year: int, month: int, color: str) -> int:
     """Main ETL flow to load data into Big Query"""
 
@@ -47,7 +47,7 @@ def etl_gcs_to_bq(year: int, month: int, color: str) -> int:
     write_bq(df, color)
     return len(df)
 
-@flow()
+@flow(log_prints=True)
 def etl_parent_flow(
     months: list[int] = [2, 3], year: int = 2019, color: str = "yellow"
 ):
