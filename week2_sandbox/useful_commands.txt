@@ -3,4 +3,8 @@ docker run -it   -e PGADMIN_DEFAULT_EMAIL="admin@admin.com"   -e PGADMIN_DEFAULT
 python ingest_data_parquet_and_csv.py --user root --password root --host localhost --port 5432 --db ny_taxi --table_name yellow_taxi_data --url https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet
 
 $ conda activate zoomcamp
+
 $ prefect orion start
+
+$ prefect deployment build ./etl_web_to_gcs.py:etl_parent_flow -n "Parameterized ETL"
+$ prefect deployment apply etl_parent_flow-deployment.yaml
