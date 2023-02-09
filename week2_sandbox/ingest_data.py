@@ -48,4 +48,3 @@ def main_flow(table_name: str):
 
 if __name__ == '__main__':
     main_flow("yellow_taxi_data")
-    print()
