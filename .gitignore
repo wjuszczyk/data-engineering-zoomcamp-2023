@@ -3,3 +3,5 @@ week1_sandbox/pgadmin
 *.parquet
 __pycache__/
 .prefectignore
+*.odp
+week3_sandbox/data/

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-"""Ingest data Prefect example"""
+"""Ingest data Prefect to PostgreSQL example"""
 
 import os
 from datetime import timedelta
