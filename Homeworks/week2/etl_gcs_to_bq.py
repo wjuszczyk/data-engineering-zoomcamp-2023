@@ -1,6 +1,6 @@
-import os
-import pandas as pd
+"""ETL load GCS data to BigQuery"""
 from pathlib import Path
+import pandas as pd
 from prefect import flow, task
 from prefect_gcp.cloud_storage import GcsBucket
 from prefect_gcp import GcpCredentials
@@ -10,7 +10,7 @@ def extract_from_gcs(color: str, year: int, month: int) -> Path:
     """Download trip data from GCS"""
     gcs_path = f"data/{color}/{color}_tripdata_{year}-{month:02}.parquet"
     gcs_block = GcsBucket.load("zoom-gcs")
-    gcs_block.get_directory(from_path=gcs_path, local_path=f".")
+    gcs_block.get_directory(from_path=gcs_path, local_path=".")
     return Path(f"{gcs_path}")
 
 @task(name="Data cleaning")
@@ -49,16 +49,19 @@ def etl_gcs_to_bq(year: int, month: int, color: str) -> int:
 
 @flow(log_prints=True)
 def etl_parent_flow(
-    months: list[int] = [2, 3], year: int = 2019, color: str = "yellow"
+    months: list, year: int = 2019, color: str = "yellow"
 ):
+    """ETL parent flow"""
+    if not months:
+        months = [2, 3]
     rows_processed = 0
     for month in months:
         rows_processed += etl_gcs_to_bq(year, month, color)
     print(f"Total rows processed: {rows_processed}")
 
 if __name__ == "__main__":
-    months = [2, 3]
-    year = 2019
-    color = "yellow"
+    outer_months = [2, 3]
+    outer_year = 2019
+    outer_color = "yellow"
 
-    etl_parent_flow(months, year, color)
+    etl_parent_flow(outer_months, outer_year, outer_color)
