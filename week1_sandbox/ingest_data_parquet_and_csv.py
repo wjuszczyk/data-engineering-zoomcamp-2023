@@ -1,24 +1,27 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""Ingest data stored in csv or parquet file to PostgreSQL DB."""
 
 import argparse
 import os
+from time import time
 import pyarrow.parquet as pq
 import pandas as pd
 
 from sqlalchemy import create_engine
-from time import time
+
 
 def main(params):
+    """Main function"""
     user = params.user
     password = params.password
     host = params.host
     port = params.port
-    db = params.db
+    database = params.db
     table_name  = params.table_name
     url = params.url
-    
-    engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
+
+    engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{database}')
 
     output_name = url.split('/')[-1]
 
@@ -39,7 +42,8 @@ def main(params):
             i.to_pandas().to_sql(name=table_name, con=engine, if_exists='append')
             index += 65536
             t_end = time()
-            print(f'\t- it took %.1f seconds' % (t_end - t_start))
+            #print('\t- it took %.1f seconds' % (t_end - t_start))
+            print(f"\t- it took {time:.1f} seconds".format(time = t_end - t_start))
     elif url.endswith('.csv') or url.endswith('.csv.gz'):
         if url.endswith('.csv.gz'):
             os.system(f"gunzip -f {output_name}")
@@ -62,14 +66,13 @@ def main(params):
                 df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
                 df.to_sql(name=table_name, con=engine, if_exists='append')
                 t_end = time()
-                print('inserted another chunk, took %.3f seconds' % (t_end - t_start))
+                print(f"inserted another chunk, took {time:.3f} seconds".format(time = t_end - t_start))
             except StopIteration:
                 print('Reached end of csv file.')
                 break
     else:
         print("Wrong URL!")
-        exit(1)
-    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Ingest CSV data to PostgreSQL')
 
