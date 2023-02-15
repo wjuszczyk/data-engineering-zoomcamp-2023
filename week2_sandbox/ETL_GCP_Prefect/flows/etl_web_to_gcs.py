@@ -30,7 +30,7 @@ def clean(data_frame: pd.DataFrame, color: str) -> pd.DataFrame:
             data_frame['tpep_pickup_datetime'])
         data_frame['tpep_dropoff_datetime'] = pd.to_datetime(
             data_frame['tpep_dropoff_datetime'])
-    #print(data_frame.head(2))
+    # print(data_frame.head(2))
     print(f"columns: {data_frame.dtypes}")
     print(f"rows: {len(data_frame)}")
     print("2. Cleaned data set")
@@ -45,40 +45,43 @@ def write_local(data_frame: pd.DataFrame, color: str, dataset_file: str) -> Path
         os.makedirs(f"../data/{color}", exist_ok=True)
     path = Path(f"../data/{color}/{dataset_file}.parquet")
     data_frame.to_parquet(path, compression="gzip")
-    print(f"3. Written ../data/{color}/{dataset_file}.parquet to disc")
+    print(f"3. Written ../data/{color}/{dataset_file}.parquet to disk")
     return path
 
 
 @task(log_prints=True)
-def write_gcs(path: Path) -> None:
+def write_gcs(path: Path) -> Path:
     """Uploading local parquet file to GCS"""
     # change path to posix type, requires prefect-gcp[cloud_storage]==0.2.4
     # (fix Windows double backslashes to slashes)
     path = Path(path).as_posix()
+    # remove trailing "../"
+    to_path = path[3:]
     gcp_cloud_storage_bucket_block = GcsBucket.load("zoom-gcs")
     gcp_cloud_storage_bucket_block.upload_from_path(
         from_path=f"{path}",
-        to_path=f"{path}"
+        to_path=f"{to_path}"
     )
     print(f"4. Written {path} to GCS")
+    return to_path
 
 
 @flow(log_prints=True)
 def etl_web_to_gcs() -> None:
     """The main ETL function"""
-    color = "yellow"
-    year = 2019
-    # color = "yellow"
-    # year = 2021
-    months =  [ *range(1,13) ]
+    color = "green"
+    year = 2020
+    months = [*range(1, 13)]
     for month in months:
         dataset_file = f"{color}_tripdata_{year}-{month:02}"
         dataset_url = f"https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{color}/{dataset_file}.csv.gz"
         data_frame = fetch(dataset_url)
         df_clean = clean(data_frame, color)
         path = write_local(df_clean, color, dataset_file)
-        write_gcs(path)
-        print(f"MAIN FLOW: Written {color}_tripdata_{year}-{month:02}.parquet file to GCS Bucket.")
+        to_path = write_gcs(path)
+        print(
+            f"MAIN FLOW: Written {color}_tripdata_{year}-{month:02}.parquet file to GCS Bucket (path: {to_path})")
+
 
 if __name__ == "__main__":
     etl_web_to_gcs()
