@@ -25,14 +25,30 @@ def clean(data_frame: pd.DataFrame, color: str) -> pd.DataFrame:
             data_frame['lpep_pickup_datetime'])
         data_frame['lpep_dropoff_datetime'] = pd.to_datetime(
             data_frame['lpep_dropoff_datetime'])
-    elif color == "yellow":
+        data_frame["trip_type"] = data_frame["trip_type"].astype('Int64')
+        data_frame["VendorID"] = data_frame["VendorID"].astype('Int64')
+        data_frame["RatecodeID"] = data_frame["RatecodeID"].astype('Int64')
+        data_frame["PULocationID"] = data_frame["PULocationID"].astype('Int64')
+        data_frame["DOLocationID"] = data_frame["DOLocationID"].astype('Int64')
+        data_frame["passenger_count"] = data_frame["passenger_count"].astype(
+            'Int64')
+        data_frame["payment_type"] = data_frame["payment_type"].astype('Int64')
+
+    if color == "yellow":
         data_frame['tpep_pickup_datetime'] = pd.to_datetime(
             data_frame['tpep_pickup_datetime'])
         data_frame['tpep_dropoff_datetime'] = pd.to_datetime(
             data_frame['tpep_dropoff_datetime'])
+        data_frame["VendorID"] = data_frame["VendorID"].astype('Int64')
+        data_frame["RatecodeID"] = data_frame["RatecodeID"].astype('Int64')
+        data_frame["PULocationID"] = data_frame["PULocationID"].astype('Int64')
+        data_frame["DOLocationID"] = data_frame["DOLocationID"].astype('Int64')
+        data_frame["passenger_count"] = data_frame["passenger_count"].astype(
+            'Int64')
+        data_frame["payment_type"] = data_frame["payment_type"].astype('Int64')
     # print(data_frame.head(2))
-    print(f"columns: {data_frame.dtypes}")
-    print(f"rows: {len(data_frame)}")
+    # print(f"columns: {data_frame.dtypes}")
+    # print(f"rows: {len(data_frame)}")
     print("2. Cleaned data set")
     return data_frame
 
@@ -69,18 +85,20 @@ def write_gcs(path: Path) -> Path:
 @flow(log_prints=True)
 def etl_web_to_gcs() -> None:
     """The main ETL function"""
-    color = "green"
-    year = 2020
+    colors = ["green", "yellow"]
+    years = [2019, 2020]
     months = [*range(1, 13)]
-    for month in months:
-        dataset_file = f"{color}_tripdata_{year}-{month:02}"
-        dataset_url = f"https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{color}/{dataset_file}.csv.gz"
-        data_frame = fetch(dataset_url)
-        df_clean = clean(data_frame, color)
-        path = write_local(df_clean, color, dataset_file)
-        to_path = write_gcs(path)
-        print(
-            f"MAIN FLOW: Written {color}_tripdata_{year}-{month:02}.parquet file to GCS Bucket (path: {to_path})")
+    for color in colors:
+        for year in years:
+            for month in months:
+                dataset_file = f"{color}_tripdata_{year}-{month:02}"
+                dataset_url = f"https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{color}/{dataset_file}.csv.gz"
+                data_frame = fetch(dataset_url)
+                df_clean = clean(data_frame, color)
+                path = write_local(df_clean, color, dataset_file)
+                to_path = write_gcs(path)
+                print(
+                    f"MAIN FLOW: Written {color}_tripdata_{year}-{month:02}.parquet file to GCS Bucket (path: {to_path})")
 
 
 if __name__ == "__main__":
