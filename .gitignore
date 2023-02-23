@@ -2,7 +2,9 @@
 **/pgadmin
 **/database_backup
 *.parquet
+*.csv.gz
 __pycache__/
 .prefectignore
 *.odp
 week3_sandbox/data/
+.vscode/
