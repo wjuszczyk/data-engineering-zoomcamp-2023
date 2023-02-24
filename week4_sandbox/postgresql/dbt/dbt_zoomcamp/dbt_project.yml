@@ -34,5 +34,17 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   dbt_zoomcamp:
     # Config indicated by + and applies to all files under models/example/
-    example:
+    staging:
       +materialized: view
+    #core:
+    #  +materialized: view
+
+vars:
+  payment_type_values: [1, 2, 3, 4, 5, 6]
+
+seeds:
+  dbt_zoomcamp:
+    taxi_zone_lookup:
+      +column_types:
+        locationid: numeric
+
