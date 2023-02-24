@@ -23,4 +23,11 @@ models:
                 severity: error
   - name: fhv_fact_trips
     description: FHV trip data
+  - name: fhv_monthly_count
+    description: month with the biggest amount of rides
+    columns:
+      - name: month
+        description: Month with biggest rides
+      - name: total_montlhy_trips
+        description: number of total trips
 
