@@ -1,6 +1,7 @@
 **/ny_taxi_postgres_data*
 **/pgadmin
 **/database_backup
+**/logs
 *.parquet
 *.csv.gz
 __pycache__/
