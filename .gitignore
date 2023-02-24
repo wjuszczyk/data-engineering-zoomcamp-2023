@@ -2,6 +2,7 @@
 **/pgadmin
 **/database_backup
 **/logs
+*.csv
 *.parquet
 *.csv.gz
 __pycache__/
@@ -9,3 +10,4 @@ __pycache__/
 *.odp
 week3_sandbox/data/
 .vscode/
+/week4_sandbox/ny_taxi_rides/seeds/taxi_zone_lookup.csv
