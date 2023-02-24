@@ -1,7 +1,11 @@
-week1_sandbox/ny_taxi_postgres_data
-week1_sandbox/pgadmin
+**/ny_taxi_postgres_data*
+**/pgadmin
+**/database_backup
+**/logs
 *.parquet
+*.csv.gz
 __pycache__/
 .prefectignore
 *.odp
 week3_sandbox/data/
+.vscode/
